@@ -1,5 +1,7 @@
 # Atmosphere | Weather App
 
+https://chida-singh.github.io/Weather_site/
+
 ## Overview
 Atmosphere is a sleek and minimalistic weather application that provides real-time weather updates for any city worldwide. The app fetches weather data using the WeatherAPI and dynamically updates the UI with current conditions, temperature, humidity, wind speed, and more.
 
