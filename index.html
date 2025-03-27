@@ -3,297 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atmosphere | Weather App</title>
+    <title>Atmosphere | Weather Insights</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
-        /* Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --bg-gradient-sunny: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            --bg-gradient-cloudy: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            --bg-gradient-rainy: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --bg-gradient-stormy: linear-gradient(135deg, #434343 0%, #000000 100%);
+            --bg-gradient-snowy: linear-gradient(135deg, #e6e9f0 0%, #eef1f5 100%);
+            --bg-gradient-default: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            transition: background 0.5s ease;
             min-height: 100vh;
             display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
-            transition: background 0.5s ease;
+            font-family: 'Inter', sans-serif;
         }
 
-        .container {
-            width: 100%;
-            max-width: 420px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: all 0.3s ease;
+        .weather-card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
 
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Search Section */
-        .search-box {
-            padding: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            background-color: white;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            outline: none;
-            background-color: #f0f2f5;
-            border-radius: 12px;
-            font-size: 16px;
-            color: #555;
-            transition: all 0.3s ease;
-        }
-
-        .search-box input:focus {
-            background-color: #e8eaed;
-        }
-
-        .search-box button {
-            margin-left: 10px;
-            padding: 12px 15px;
-            background-color: #4a8cff;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .search-box button:hover {
-            background-color: #3a7ae8;
-        }
-
-        /* Weather Display */
-        .weather-display {
-            padding: 30px 25px;
-            text-align: center;
-        }
-
-        .city {
-            font-size: 28px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .date {
-            font-size: 14px;
-            color: #777;
-            margin-bottom: 25px;
+        .weather-card:hover {
+            transform: scale(1.02);
         }
 
         .weather-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 25px;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
         }
 
-        .weather-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .temperature {
-            font-size: 64px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .description {
-            font-size: 18px;
-            color: #555;
-            margin-bottom: 25px;
-            text-transform: capitalize;
-        }
-
-        /* Weather Details */
-        .weather-details {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px 25px;
-            background-color: #f8f9fa;
-            border-radius: 0 0 20px 20px;
+            animation: pulse 2s infinite;
         }
 
         .detail-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
         }
 
-        .detail-label {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 5px;
-        }
-
-        .detail-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        /* Loading and Error States */
-        .loading, .error {
-            text-align: center;
-            padding: 30px;
-            color: #555;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 480px) {
-            .container {
-                max-width: 100%;
-            }
-            
-            .temperature {
-                font-size: 54px;
-            }
+        .detail-item:hover {
+            opacity: 1;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="search-box">
-            <input type="text" placeholder="Search for a city..." id="search-input">
-            <button id="search-button">Search</button>
+<body class="bg-gradient-to-br from-purple-500 to-indigo-600">
+    <div class="weather-card w-96 p-6 text-white bg-opacity-20 shadow-2xl">
+        <div class="mb-6">
+            <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Search city..." 
+                class="w-full px-4 py-2 rounded-lg bg-white bg-opacity-20 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
+            >
+            <button 
+                id="search-button" 
+                class="mt-3 w-full py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition"
+            >
+                Search
+            </button>
         </div>
         
-        <div id="weather-container">
-            <!-- Weather content will be displayed here -->
-            <div class="loading">Search for a city to see the weather</div>
+        <div id="weather-container" class="text-center">
+            <div class="text-gray-200">Search for a city to view weather</div>
         </div>
     </div>
 
     <script>
-        // API Configuration
-        const API_KEY = '5be42b8dd76947a58a575450251203'; // Your WeatherAPI.com API key
+        const API_KEY = '5be42b8dd76947a58a575450251203';
         const API_URL = 'https://api.weatherapi.com/v1/current.json';
         
-        // DOM Elements
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
         const weatherContainer = document.getElementById('weather-container');
         
-        // Event Listeners
-        searchButton.addEventListener('click', getWeather);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                getWeather();
-            }
-        });
+        const weatherBackgrounds = {
+            sunny: 'from-yellow-400 to-orange-500',
+            clear: 'from-blue-400 to-blue-600',
+            cloudy: 'from-gray-400 to-gray-600',
+            rain: 'from-indigo-600 to-blue-500',
+            drizzle: 'from-blue-500 to-blue-700',
+            thunderstorm: 'from-gray-800 to-black',
+            snow: 'from-gray-100 to-gray-300',
+            mist: 'from-gray-500 to-gray-700',
+            default: 'from-purple-500 to-indigo-600'
+        };
         
-        // Get Weather Data
-        function getWeather() {
-            const city = searchInput.value.trim();
-            
-            if (!city) return;
-            
-            // Show loading state
-            weatherContainer.innerHTML = '<div class="loading">Loading weather information...</div>';
-            
-            fetch(`${API_URL}?key=${API_KEY}&q=${city}&aqi=no`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('City not found or API limit reached');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    displayWeather(data);
-                })
-                .catch(error => {
-                    weatherContainer.innerHTML = `
-                        <div class="error">
-                            <p>${error.message}</p>
-                        </div>
-                    `;
-                });
+        function debounce(func, delay) {
+            let timeoutId;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(context, args), delay);
+            };
         }
         
-        // Display Weather Data
-        function displayWeather(data) {
-            const location = data.location;
-            const current = data.current;
+        const getWeather = debounce(async () => {
+            const city = searchInput.value.trim();
+            if (!city) return;
             
-            // Format date
-            const date = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDate = date.toLocaleDateString('en-US', options);
-            
-            // Update UI
             weatherContainer.innerHTML = `
-                <div class="weather-display">
-                    <div class="city">${location.name}, ${location.country}</div>
-                    <div class="date">${formattedDate}</div>
-                    <div class="weather-icon">
-                        <img src="${current.condition.icon}" alt="${current.condition.text}">
-                    </div>
-                    <div class="temperature">${Math.round(current.temp_c)}°C</div>
-                    <div class="description">${current.condition.text}</div>
-                </div>
-                <div class="weather-details">
-                    <div class="detail-item">
-                        <div class="detail-label">Feels Like</div>
-                        <div class="detail-value">${Math.round(current.feelslike_c)}°C</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Humidity</div>
-                        <div class="detail-value">${current.humidity}%</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Wind</div>
-                        <div class="detail-value">${current.wind_kph} km/h</div>
-                    </div>
+                <div class="text-center text-white opacity-70">
+                    Fetching weather data...
                 </div>
             `;
             
-            // Change background based on weather
-            updateBackground(current.condition.text);
+            try {
+                const response = await fetch(`${API_URL}?key=${API_KEY}&q=${city}&aqi=no`);
+                const data = await response.json();
+                displayWeather(data);
+            } catch (error) {
+                weatherContainer.innerHTML = `
+                    <div class="text-red-300">
+                        ${error.message || 'Unable to fetch weather data'}
+                    </div>
+                `;
+            }
+        }, 500);
+        
+        function displayWeather(data) {
+            const { location, current } = data;
+            const date = new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            const condition = current.condition.text.toLowerCase();
+            const backgroundClass = Object.keys(weatherBackgrounds).find(key => 
+                condition.includes(key)
+            ) || 'default';
+            
+            document.body.className = `bg-gradient-to-br ${weatherBackgrounds[backgroundClass]} min-h-screen flex items-center justify-center`;
+            
+            weatherContainer.innerHTML = `
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold mb-2">${location.name}, ${location.country}</h2>
+                    <p class="text-sm mb-4 opacity-80">${date}</p>
+                    
+                    <div class="weather-icon mx-auto w-32 h-32 mb-4">
+                        <img src="${current.condition.icon}" alt="${current.condition.text}" class="w-full h-full object-contain">
+                    </div>
+                    
+                    <div class="temperature text-6xl font-extrabold mb-4">
+                        ${Math.round(current.temp_c)}°C
+                    </div>
+                    
+                    <p class="text-xl mb-6 capitalize">${current.condition.text}</p>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="detail-item">
+                            <p class="text-xs opacity-70">Feels Like</p>
+                            <p class="font-bold">${Math.round(current.feelslike_c)}°C</p>
+                        </div>
+                        <div class="detail-item">
+                            <p class="text-xs opacity-70">Humidity</p>
+                            <p class="font-bold">${current.humidity}%</p>
+                        </div>
+                        <div class="detail-item">
+                            <p class="text-xs opacity-70">Wind</p>
+                            <p class="font-bold">${current.wind_kph} km/h</p>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
         
-        // Update Background based on Weather
-        function updateBackground(weatherCondition) {
-            let gradient;
-            const condition = weatherCondition.toLowerCase();
-            
-            if (condition.includes('sunny') || condition.includes('clear')) {
-                gradient = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
-            } else if (condition.includes('cloud')) {
-                gradient = 'linear-gradient(135deg, #e0e0e0 0%, #b3b3b3 100%)';
-            } else if (condition.includes('rain') || condition.includes('drizzle')) {
-                gradient = 'linear-gradient(135deg, #616161 0%, #9bc5c3 100%)';
-            } else if (condition.includes('thunder') || condition.includes('storm')) {
-                gradient = 'linear-gradient(135deg, #292929 0%, #536976 100%)';
-            } else if (condition.includes('snow') || condition.includes('sleet')) {
-                gradient = 'linear-gradient(135deg, #e6e6e6 0%, #d4d4d4 100%)';
-            } else if (condition.includes('mist') || condition.includes('fog')) {
-                gradient = 'linear-gradient(135deg, #d7d2cc 0%, #304352 100%)';
-            } else {
-                gradient = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
-            }
-            
-            document.body.style.background = gradient;
-        }
+        searchButton.addEventListener('click', getWeather);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') getWeather();
+        });
     </script>
 </body>
 </html>
