@@ -1,3 +1,4 @@
+// Weather Backgrounds Configuration
 const weatherBackgrounds = {
     sunny: 'from-yellow-400 to-orange-500',
     clear: 'from-blue-400 to-blue-600',

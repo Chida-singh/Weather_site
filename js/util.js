@@ -1,3 +1,4 @@
+// Utility Functions
 function debounce(func, delay) {
     let timeoutId;
     return function() {
